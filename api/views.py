@@ -4,12 +4,10 @@ from django.http import HttpResponse
 from lxml import html
 
 
-def test(request):
+def get_polyclinic_timetable(url):
     properties_daily = ['speciality', 'name', 'room', 'region', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday']
     properties_remarks = ['speciality', 'name', 'room', 'region', 'remarks']
     doctors = []
-    # url = 'http://uslugivkz.ru/index.php/uslugi-chastnykh-lits/raspisanie-detskoj-polikliniki'
-    url = 'http://uslugivkz.ru/index.php/uslugi-chastnykh-lits/rasp-vz-pol'
     # print(datetime.datetime.now())
     html_tree = html.parse(url)
     root = html_tree.getroot()
@@ -27,4 +25,20 @@ def test(request):
         doctors.append(doctor)
     print({'value': doctors})
     # print(datetime.datetime.now())
-    return HttpResponse(json.dumps(doctors, ensure_ascii=False))  # ensure-ascii???
+    return json.dumps(doctors, ensure_ascii=False)  # ensure-ascii???
+
+
+def test(request):
+    return HttpResponse('test')
+
+
+def get_children_polyclinic_timetable(request):
+    url = 'http://uslugivkz.ru/index.php/uslugi-chastnykh-lits/raspisanie-detskoj-polikliniki'
+    timetable = get_polyclinic_timetable(url)
+    return HttpResponse(timetable)
+
+
+def get_adult_polyclinic_timetable(request):
+    url = 'http://uslugivkz.ru/index.php/uslugi-chastnykh-lits/rasp-vz-pol'
+    timetable = get_polyclinic_timetable(url)
+    return HttpResponse(timetable)
