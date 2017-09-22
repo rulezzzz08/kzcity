@@ -187,3 +187,27 @@ def get_timetable(request):
             timetables.append(timetable)
         return HttpResponse(json.dumps(timetables, ensure_ascii=False))
     return HttpResponseBadRequest
+
+
+def get_cats(request):
+    cursor = connection.cursor()
+    sql_query = """
+            select c.id cat_id, c.name cat, s.id sub_id, s.name sub
+            from org_categories c
+            left join org_subcategories s
+            on c.id = s.cat_id
+            order by c.id, s.id;
+        """
+    cursor.execute(sql_query)
+    sql_result = cursor.fetchall()
+    categories = [dict(category=sql_result[0][1])]
+    if sql_result[0][3] is not None:
+        categories[0]['subcategories'] = [sql_result[0][3]]
+    for i, row in enumerate(sql_result[1:]):
+        if row[0] != sql_result[i][0]:
+            categories.append(dict(category=row[1]))
+            if row[3] is not None:
+                categories[-1]['subcategories'] = [row[3]]
+        else:
+            categories[-1].get('subcategories', []).append(row[3])
+    return HttpResponse(json.dumps(categories, ensure_ascii=False))
