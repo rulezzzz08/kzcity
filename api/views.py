@@ -200,14 +200,14 @@ def get_cats(request):
         """
     cursor.execute(sql_query)
     sql_result = cursor.fetchall()
-    categories = [dict(category=sql_result[0][1])]
+    categories = [dict(id=sql_result[0][0], name=sql_result[0][1])]
     if sql_result[0][3] is not None:
         categories[0]['subcategories'] = [sql_result[0][3]]
     for i, row in enumerate(sql_result[1:]):
         if row[0] != sql_result[i][0]:
-            categories.append(dict(category=row[1]))
-            if row[3] is not None:
-                categories[-1]['subcategories'] = [row[3]]
+            categories.append(dict(id=row[0], name=row[1]))
+            if row[2] is not None:
+                categories[-1]['subcategories'] = [dict(id=row[2], name=row[3])]
         else:
-            categories[-1].get('subcategories', []).append(row[3])
+            categories[-1].get('subcategories', []).append(dict(id=row[2], name=row[3]))
     return HttpResponse(json.dumps(categories, ensure_ascii=False))
