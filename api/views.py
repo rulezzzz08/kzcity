@@ -215,10 +215,10 @@ def get_cats(request):
 
 def get_orgs(request):
     cursor = connection.cursor()
-    if request.GET.get('subcat') and request.GET.get('cat'):
+    if request.GET.get('subcat_id') and request.GET.get('cat_id'):
         params = dict(
-            cat=request.GET['cat'],
-            subcat=request.GET['subcat']
+            cat=request.GET['cat_id'],
+            subcat=request.GET['subcat_id']
         )
         sql_query = """
             select card.city_id, c.name city, card.street_id, s.name street, building_num, 
@@ -234,9 +234,9 @@ def get_orgs(request):
             join streets s on card.street_id = s.id
             order by card.id
         """
-    elif request.GET.get('cat'):
+    elif request.GET.get('cat_id'):
         params = dict(
-            cat=request.GET['cat'],
+            cat=request.GET['cat_id'],
         )
         sql_query = """
                     select card.city_id, c.name city, card.street_id, s.name street, building_num, 
