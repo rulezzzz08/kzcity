@@ -211,3 +211,65 @@ def get_cats(request):
         else:
             categories[-1].get('subcategories', []).append(dict(id=row[2], name=row[3]))
     return HttpResponse(json.dumps(categories, ensure_ascii=False))
+
+
+def get_orgs(request):
+    cursor = connection.cursor()
+    if request.GET.get('subcat') and request.GET.get('cat'):
+        params = dict(
+            cat=request.GET['cat'],
+            subcat=request.GET['subcat']
+        )
+        sql_query = """
+            select card.city_id, c.name city, card.street_id, s.name street, building_num, 
+            card.id, card.name name, cat_id, subcat_id, lon, lat, description
+            from
+            (
+                select *
+                from org_cards
+                where cat_id = %(cat)s # param
+                and subcat_id = %(subcat)s # param
+            ) as card
+            join cities c on card.city_id = c.id
+            join streets s on card.street_id = s.id
+            order by card.id
+        """
+    elif request.GET.get('cat'):
+        params = dict(
+            cat=request.GET['cat'],
+        )
+        sql_query = """
+                    select card.city_id, c.name city, card.street_id, s.name street, building_num, 
+                    card.id, card.name name, cat_id, subcat_id, lon, lat, description
+                    from
+                    (
+                        select *
+                        from org_cards
+                        where cat_id = %(cat)s # param
+                    ) as card
+                    join cities c on card.city_id = c.id
+                    join streets s on card.street_id = s.id
+                    order by card.id
+                """
+    else:
+        return HttpResponseBadRequest
+    cursor.execute(sql_query, params)
+    sql_result = cursor.fetchall()
+    orgs = []
+    for row in sql_result:
+        org = dict(
+            city_id=row[0],
+            city=row[1],
+            street_id=row[2],
+            street=row[3],
+            building_num=row[4],
+            id=row[5],
+            name=row[6],
+            cat_id=row[7],
+            subcat_id=row[8],
+            lon=row[9],
+            lat=row[10],
+            description=row[11]
+        )
+        orgs.append(org)
+    return HttpResponse(json.dumps(orgs, ensure_ascii=False))

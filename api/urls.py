@@ -9,5 +9,6 @@ urlpatterns = [
     url(r'^transport/get_all_routes$', views.get_all_routes),
     url(r'^transport/get_timetable_daily$', views.get_timetable_daily),
     url(r'^transport/get_timetable$', views.get_timetable),
-    url(r'^org/get_cats', views.get_cats)
+    url(r'^org/get_cats', views.get_cats),
+    url(r'^org/get_orgs', views.get_orgs),
 ]
