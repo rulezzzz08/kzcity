@@ -196,13 +196,13 @@ def get_cats(request):
             from org_categories c
             left join org_subcategories s
             on c.id = s.cat_id
-            order by c.id, s.id;
+            order by cat, sub;
         """
     cursor.execute(sql_query)
     sql_result = cursor.fetchall()
     categories = [dict(id=sql_result[0][0], name=sql_result[0][1])]
     if sql_result[0][3] is not None:
-        categories[0]['subcategories'] = [sql_result[0][3]]
+        categories[0]['subcategories'] = [dict(id=sql_result[0][2], name=sql_result[0][3])]
     for i, row in enumerate(sql_result[1:]):
         if row[0] != sql_result[i][0]:
             categories.append(dict(id=row[0], name=row[1]))
@@ -222,7 +222,7 @@ def get_orgs(request):
         )
         sql_query = """
             select card.city_id, c.name city, card.street_id, s.name street, building_num, 
-            card.id, card.name name, cat_id, subcat_id, lon, lat, description
+            card.id, card.name name, cat_id, subcat_id, lon, lat, phone, url, description
             from
             (
                 select *
@@ -232,7 +232,7 @@ def get_orgs(request):
             ) as card
             join cities c on card.city_id = c.id
             join streets s on card.street_id = s.id
-            order by card.id
+            order by name
         """
     elif request.GET.get('cat_id'):
         params = dict(
@@ -240,7 +240,7 @@ def get_orgs(request):
         )
         sql_query = """
                     select card.city_id, c.name city, card.street_id, s.name street, building_num, 
-                    card.id, card.name name, cat_id, subcat_id, lon, lat, description
+                    card.id, card.name name, cat_id, subcat_id, lon, lat, phone, url, description
                     from
                     (
                         select *
@@ -249,7 +249,7 @@ def get_orgs(request):
                     ) as card
                     join cities c on card.city_id = c.id
                     join streets s on card.street_id = s.id
-                    order by card.id
+                    order by name
                 """
     else:
         return HttpResponseBadRequest
@@ -269,7 +269,9 @@ def get_orgs(request):
             subcat_id=row[8],
             lon=row[9],
             lat=row[10],
-            description=row[11]
+            phone=row[11],
+            url=row[12],
+            description=row[13]
         )
         orgs.append(org)
     return HttpResponse(json.dumps(orgs, ensure_ascii=False))
